@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kanban Board</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1>Kanban Board</h1>
+  </header>
+
+  <main id="board">
+    <section class="column" id="col-todo" data-column="todo">
+      <div class="column-header todo-header">
+        <span class="column-title">TO-DO</span>
+        <span class="column-badge" id="badge-todo">0</span>
+      </div>
+      <ul class="card-list" id="list-todo"></ul>
+      <div class="add-card-form">
+        <input
+          type="text"
+          class="card-input"
+          data-column="todo"
+          placeholder="새 카드 추가..."
+          maxlength="200"
+        >
+        <button class="add-btn" data-column="todo">추가</button>
+      </div>
+    </section>
+
+    <section class="column" id="col-inprogress" data-column="inprogress">
+      <div class="column-header inprogress-header">
+        <span class="column-title">In-Progress</span>
+        <span class="column-badge" id="badge-inprogress">0</span>
+      </div>
+      <ul class="card-list" id="list-inprogress"></ul>
+      <div class="add-card-form">
+        <input
+          type="text"
+          class="card-input"
+          data-column="inprogress"
+          placeholder="새 카드 추가..."
+          maxlength="200"
+        >
+        <button class="add-btn" data-column="inprogress">추가</button>
+      </div>
+    </section>
+
+    <section class="column" id="col-done" data-column="done">
+      <div class="column-header done-header">
+        <span class="column-title">Done</span>
+        <span class="column-badge" id="badge-done">0</span>
+      </div>
+      <ul class="card-list" id="list-done"></ul>
+      <div class="add-card-form">
+        <input
+          type="text"
+          class="card-input"
+          data-column="done"
+          placeholder="새 카드 추가..."
+          maxlength="200"
+        >
+        <button class="add-btn" data-column="done">추가</button>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

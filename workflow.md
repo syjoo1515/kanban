@@ -287,3 +287,15 @@
 - `app.js` Google/GitHub 소셜 버튼 핸들러에 `async/await` 및 에러 처리 추가
 - Supabase Dashboard GitHub Provider 활성화 여부 확인 안내
 - `TASKS.md` / `workflow.md` 업데이트
+
+---
+
+### 26. 카드 추가 버튼 데이터 미반영 버그
+
+**프롬프트**
+> 카드 추가 버튼시 데이터가 추가되지 않는거같아
+
+**작업**
+- `app.js` `loadCards`, `addCard`, `deleteCard`, `moveCard` 에러를 화면에 표시하도록 수정
+- `select()` 쿼리에서 `"column"` 예약어 명시적 처리
+- `showBoardError()` 함수 추가 (5초 후 자동 제거)

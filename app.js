@@ -18,6 +18,17 @@ function showError(msg) {
 }
 function clearError() { authError.classList.add('hidden'); authError.textContent = ''; }
 
+function showBoardError(msg) {
+  const existing = document.getElementById('board-error');
+  if (existing) existing.remove();
+  const el = document.createElement('p');
+  el.id = 'board-error';
+  el.style.cssText = 'color:#e53935;font-size:0.85rem;padding:8px 24px;';
+  el.textContent = '오류: ' + msg;
+  document.getElementById('board').before(el);
+  setTimeout(() => el.remove(), 5000);
+}
+
 supabase.auth.onAuthStateChange((_event, session) => {
   if (session?.user) {
     userEmailEl.textContent = session.user.email ?? session.user.user_metadata?.user_name ?? '';
@@ -103,11 +114,11 @@ async function loadCards() {
 
   const { data, error } = await supabase
     .from('cards')
-    .select('*')
+    .select('id, user_id, title, "column", position, created_at')
     .eq('user_id', user.id)
     .order('created_at');
 
-  if (error) { console.error(error); return; }
+  if (error) { console.error('loadCards error:', error); showBoardError(error.message); return; }
   cards = data;
   renderBoard();
 }
@@ -122,17 +133,17 @@ async function addCard(title, column) {
   const { data, error } = await supabase
     .from('cards')
     .insert({ title: trimmed, column, user_id: user.id })
-    .select()
+    .select('id, user_id, title, "column", position, created_at')
     .single();
 
-  if (error) { console.error(error); return; }
+  if (error) { console.error('addCard error:', error); showBoardError(error.message); return; }
   cards.push(data);
   renderBoard();
 }
 
 async function deleteCard(id) {
   const { error } = await supabase.from('cards').delete().eq('id', id);
-  if (error) { console.error(error); return; }
+  if (error) { console.error('deleteCard error:', error); showBoardError(error.message); return; }
   cards = cards.filter(c => c.id !== id);
   renderBoard();
 }
@@ -142,7 +153,7 @@ async function moveCard(id, targetColumn) {
   if (!card || card.column === targetColumn) return;
 
   const { error } = await supabase.from('cards').update({ column: targetColumn }).eq('id', id);
-  if (error) { console.error(error); return; }
+  if (error) { console.error('moveCard error:', error); showBoardError(error.message); return; }
   card.column = targetColumn;
   renderBoard();
 }

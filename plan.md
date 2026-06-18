@@ -3,7 +3,7 @@
 ## 파일 구조
 
 ```
-kanba/
+kanban/
 ├── index.html
 ├── style.css
 ├── app.js

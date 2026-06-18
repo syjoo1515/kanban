@@ -56,9 +56,22 @@ document.getElementById('btn-signup').addEventListener('click', async () => {
   if (!email || !password) return showError('이메일과 비밀번호를 입력해주세요.');
   if (password.length < 6)  return showError('비밀번호는 6자 이상이어야 합니다.');
 
-  const { error } = await supabase.auth.signUp({ email, password });
-  if (error) showError(error.message);
-  else showError('확인 이메일을 발송했습니다. 메일함을 확인해주세요.');
+  const { data, error } = await supabase.auth.signUp({ email, password });
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes('already registered') || msg.includes('already been registered')) {
+      showError('이미 해당 이메일과 연동된 소셜 계정이 있습니다. 소셜 로그인을 이용해주세요.');
+    } else {
+      showError(error.message);
+    }
+    return;
+  }
+  // identities가 비어있으면 이미 존재하는 계정 (Supabase 중복 가입 방지 동작)
+  if (data.user && data.user.identities && data.user.identities.length === 0) {
+    showError('이미 해당 이메일과 연동된 소셜 계정이 있습니다. 소셜 로그인을 이용해주세요.');
+    return;
+  }
+  showError('확인 이메일을 발송했습니다. 메일함을 확인해주세요.');
 });
 
 document.getElementById('btn-logout').addEventListener('click', () => {

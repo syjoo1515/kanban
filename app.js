@@ -1,32 +1,136 @@
-const STORAGE_KEY = 'kanban-cards';
+import { supabase } from './supabase.js';
+
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+
+const authScreen  = document.getElementById('auth-screen');
+const boardScreen = document.getElementById('board-screen');
+const userEmailEl = document.getElementById('user-email');
+const authError   = document.getElementById('auth-error');
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+function showAuth()  { authScreen.classList.remove('hidden'); boardScreen.classList.add('hidden'); }
+function showBoard() { authScreen.classList.add('hidden');    boardScreen.classList.remove('hidden'); }
+
+function showError(msg) {
+  authError.textContent = msg;
+  authError.classList.remove('hidden');
+}
+function clearError() { authError.classList.add('hidden'); authError.textContent = ''; }
+
+supabase.auth.onAuthStateChange((_event, session) => {
+  if (session?.user) {
+    userEmailEl.textContent = session.user.email ?? session.user.user_metadata?.user_name ?? '';
+    showBoard();
+    loadCards();
+  } else {
+    showAuth();
+  }
+});
+
+document.getElementById('btn-google').addEventListener('click', () => {
+  clearError();
+  supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+});
+
+document.getElementById('btn-github').addEventListener('click', () => {
+  clearError();
+  supabase.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: location.href } });
+});
+
+document.getElementById('btn-login').addEventListener('click', async (e) => {
+  e.preventDefault();
+  clearError();
+  const email    = document.getElementById('input-email').value.trim();
+  const password = document.getElementById('input-password').value;
+  if (!email || !password) return showError('이메일과 비밀번호를 입력해주세요.');
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) showError(error.message);
+});
+
+document.getElementById('btn-signup').addEventListener('click', async () => {
+  clearError();
+  const email    = document.getElementById('input-email').value.trim();
+  const password = document.getElementById('input-password').value;
+  if (!email || !password) return showError('이메일과 비밀번호를 입력해주세요.');
+  if (password.length < 6)  return showError('비밀번호는 6자 이상이어야 합니다.');
+
+  const { error } = await supabase.auth.signUp({ email, password });
+  if (error) showError(error.message);
+  else showError('확인 이메일을 발송했습니다. 메일함을 확인해주세요.');
+});
+
+document.getElementById('btn-logout').addEventListener('click', () => {
+  supabase.auth.signOut();
+});
 
 // ── State ─────────────────────────────────────────────────────────────────────
 
-function loadState() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch {
-    return [];
-  }
+let cards = [];
+
+async function getCurrentUser() {
+  const { data: { session } } = await supabase.auth.getSession();
+  return session?.user ?? null;
 }
 
-function saveState(cards) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
-  } catch {
-    // localStorage 사용 불가 환경에서는 무시
-  }
+// ── DB Operations ─────────────────────────────────────────────────────────────
+
+async function loadCards() {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from('cards')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at');
+
+  if (error) { console.error(error); return; }
+  cards = data;
+  renderBoard();
 }
 
-let cards = loadState();
+async function addCard(title, column) {
+  const trimmed = title.trim();
+  if (!trimmed) return;
+
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const { data, error } = await supabase
+    .from('cards')
+    .insert({ title: trimmed, column, user_id: user.id })
+    .select()
+    .single();
+
+  if (error) { console.error(error); return; }
+  cards.push(data);
+  renderBoard();
+}
+
+async function deleteCard(id) {
+  const { error } = await supabase.from('cards').delete().eq('id', id);
+  if (error) { console.error(error); return; }
+  cards = cards.filter(c => c.id !== id);
+  renderBoard();
+}
+
+async function moveCard(id, targetColumn) {
+  const card = cards.find(c => c.id === id);
+  if (!card || card.column === targetColumn) return;
+
+  const { error } = await supabase.from('cards').update({ column: targetColumn }).eq('id', id);
+  if (error) { console.error(error); return; }
+  card.column = targetColumn;
+  renderBoard();
+}
 
 // ── Rendering ─────────────────────────────────────────────────────────────────
 
 function renderBoard() {
-  const columns = ['todo', 'inprogress', 'done'];
-
-  columns.forEach(col => {
-    const list = document.getElementById(`list-${col}`);
+  ['todo', 'inprogress', 'done'].forEach(col => {
+    const list  = document.getElementById(`list-${col}`);
     const badge = document.getElementById(`badge-${col}`);
     const colCards = cards.filter(c => c.column === col);
 
@@ -44,7 +148,7 @@ function createCardEl(card) {
 
   const text = document.createElement('span');
   text.className = 'card-text';
-  text.textContent = card.text;
+  text.textContent = card.title;
 
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'delete-btn';
@@ -54,69 +158,28 @@ function createCardEl(card) {
 
   li.appendChild(text);
   li.appendChild(deleteBtn);
-
-  // Drag events on card
   li.addEventListener('dragstart', onDragStart);
   li.addEventListener('dragend', onDragEnd);
 
   return li;
 }
 
-// ── Card Operations ───────────────────────────────────────────────────────────
-
-function addCard(text, column) {
-  const trimmed = text.trim();
-  if (!trimmed) return;
-
-  cards.push({ id: Date.now().toString(), text: trimmed, column });
-  saveState(cards);
-  renderBoard();
-}
-
-function deleteCard(id) {
-  cards = cards.filter(c => c.id !== id);
-  saveState(cards);
-  renderBoard();
-}
-
-function moveCard(id, targetColumn) {
-  const card = cards.find(c => c.id === id);
-  if (!card || card.column === targetColumn) return;
-
-  card.column = targetColumn;
-  saveState(cards);
-  renderBoard();
-}
-
 // ── Drag and Drop ─────────────────────────────────────────────────────────────
 
-let draggingId = null;
-
 function onDragStart(e) {
-  draggingId = e.currentTarget.dataset.id;
-  e.dataTransfer.setData('text/plain', draggingId);
+  e.dataTransfer.setData('text/plain', e.currentTarget.dataset.id);
   e.dataTransfer.effectAllowed = 'move';
-  // 다음 프레임에 클래스 추가해야 드래그 이미지가 정상 렌더링됨
   requestAnimationFrame(() => e.currentTarget.classList.add('dragging'));
 }
 
 function onDragEnd(e) {
   e.currentTarget.classList.remove('dragging');
-  draggingId = null;
 }
 
-function onDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = 'move';
-}
-
-function onDragEnter(e) {
-  e.preventDefault();
-  e.currentTarget.classList.add('drag-over');
-}
+function onDragOver(e)  { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function onDragEnter(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
 
 function onDragLeave(e) {
-  // 자식 요소로 이동할 때 발생하는 오발사 방지
   if (e.currentTarget.contains(e.relatedTarget)) return;
   e.currentTarget.classList.remove('drag-over');
 }
@@ -124,7 +187,6 @@ function onDragLeave(e) {
 function onDrop(e) {
   e.preventDefault();
   e.currentTarget.classList.remove('drag-over');
-
   const id = e.dataTransfer.getData('text/plain');
   const targetColumn = e.currentTarget.dataset.column;
   if (id && targetColumn) moveCard(id, targetColumn);
@@ -132,40 +194,28 @@ function onDrop(e) {
 
 // ── Event Binding ─────────────────────────────────────────────────────────────
 
-function bindColumnEvents() {
-  document.querySelectorAll('.column').forEach(col => {
-    col.addEventListener('dragover', onDragOver);
-    col.addEventListener('dragenter', onDragEnter);
-    col.addEventListener('dragleave', onDragLeave);
-    col.addEventListener('drop', onDrop);
-  });
-}
+document.querySelectorAll('.column').forEach(col => {
+  col.addEventListener('dragover',  onDragOver);
+  col.addEventListener('dragenter', onDragEnter);
+  col.addEventListener('dragleave', onDragLeave);
+  col.addEventListener('drop',      onDrop);
+});
 
-function bindFormEvents() {
-  document.querySelectorAll('.add-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const col = btn.dataset.column;
-      const input = document.querySelector(`.card-input[data-column="${col}"]`);
-      addCard(input.value, col);
+document.querySelectorAll('.add-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const col   = btn.dataset.column;
+    const input = document.querySelector(`.card-input[data-column="${col}"]`);
+    addCard(input.value, col);
+    input.value = '';
+    input.focus();
+  });
+});
+
+document.querySelectorAll('.card-input').forEach(input => {
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      addCard(input.value, input.dataset.column);
       input.value = '';
-      input.focus();
-    });
+    }
   });
-
-  document.querySelectorAll('.card-input').forEach(input => {
-    input.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        addCard(input.value, input.dataset.column);
-        input.value = '';
-      }
-    });
-  });
-}
-
-// ── Init ──────────────────────────────────────────────────────────────────────
-
-document.addEventListener('DOMContentLoaded', () => {
-  bindColumnEvents();
-  bindFormEvents();
-  renderBoard();
 });

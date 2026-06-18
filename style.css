@@ -33,9 +33,173 @@ body {
   min-height: 100vh;
 }
 
+/* ── Utility ─────────────────────────────── */
+
+.hidden { display: none !important; }
+
+/* ── Auth Screen ─────────────────────────── */
+
+#auth-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: var(--space-lg);
+}
+
+.auth-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.auth-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.auth-subtitle {
+  font-size: 0.9rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.social-btns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.social-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: 10px var(--space-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 500;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.google-btn {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+.google-btn:hover {
+  background-color: #f5f5f5;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+
+.github-btn {
+  background-color: #24292e;
+  border: 1px solid #24292e;
+  color: #ffffff;
+}
+
+.github-btn:hover {
+  background-color: #1b1f23;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-lg) 0;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background-color: var(--color-border);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-bottom: var(--space-md);
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.form-group input {
+  padding: 9px var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-family: var(--font-family);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.form-group input:focus {
+  border-color: var(--color-btn);
+}
+
+.auth-error {
+  font-size: 0.85rem;
+  color: #e53935;
+  margin-bottom: var(--space-sm);
+  text-align: center;
+}
+
+.email-btns {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.email-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-family);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.primary-btn {
+  background-color: var(--color-btn);
+  color: #ffffff;
+}
+
+.primary-btn:hover { background-color: var(--color-btn-hover); }
+
+.secondary-btn {
+  background-color: #f0f2f5;
+  color: var(--color-text-primary);
+}
+
+.secondary-btn:hover { background-color: #e0e2e5; }
+
 /* ── Header ─────────────────────────────── */
 
 .app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--space-md) var(--space-lg);
   background-color: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
@@ -45,6 +209,31 @@ body {
   font-size: 1.5rem;
   font-weight: 700;
 }
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.user-email {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.logout-btn {
+  padding: 6px 14px;
+  background-color: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-family: var(--font-family);
+  cursor: pointer;
+  color: var(--color-text-primary);
+  transition: background-color 0.15s ease;
+}
+
+.logout-btn:hover { background-color: #f0f2f5; }
 
 /* ── Board ───────────────────────────────── */
 

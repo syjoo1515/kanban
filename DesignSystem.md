@@ -58,6 +58,43 @@
 
 ## 4. 컴포넌트
 
+### Auth Screen
+- 레이아웃: `display: flex`, `align-items: center`, `justify-content: center`, `min-height: 100vh`
+- 배경: `--color-bg`
+
+### Auth Card
+- 너비: `max-width: 400px`
+- 배경: `--color-surface`
+- `border: 1px solid --color-border`
+- `border-radius: 12px`
+- `padding: 40px 36px`
+- `box-shadow: 0 4px 24px rgba(0,0,0,0.08)`
+
+### Social Button (Google / GitHub)
+- 너비: `100%`
+- `display: flex`, `align-items: center`, `gap: 8px`
+- Google: 흰색 배경, 테두리 `--color-border`
+- GitHub: `#24292e` 배경, 흰색 텍스트
+- hover: 배경색 강조
+
+### Email Form
+- `label` + `input` 수직 배치
+- input focus: `border-color: --color-btn`
+- 에러 메시지: `color: #e53935`, 중앙 정렬
+
+### Email Buttons (로그인 / 회원가입)
+- `display: flex`, `gap: 8px`
+- 로그인(primary): `background: --color-btn`, 흰색 텍스트
+- 회원가입(secondary): `background: #f0f2f5`, 기본 텍스트
+
+### Header (보드 화면)
+- `display: flex`, `justify-content: space-between`
+- 우측: 유저 이메일 + 로그아웃 버튼
+
+### Logout Button
+- 투명 배경, `border: 1px solid --color-border`
+- hover: `background: #f0f2f5`
+
 ### Board
 - 배경: `--color-bg`
 - 레이아웃: `display: flex`, `gap: 24px`, `padding: 24px`

@@ -78,19 +78,19 @@
 
 ## Phase 5: Supabase 설정 (사용자 직접 수행)
 
-- [ ] Supabase 프로젝트 생성 및 URL / ANON KEY 발급
+- [x] Supabase 프로젝트 생성 및 URL / ANON KEY 발급
 - [x] `supabase.js`에 URL과 KEY 입력
-- [ ] SQL Editor에서 cards 테이블 + RLS 정책 실행
-- [ ] Authentication → Providers에서 Google OAuth 활성화
-- [ ] Authentication → Providers에서 GitHub OAuth 활성화
-- [ ] Authentication → URL Configuration에 Redirect URL 추가
+- [x] SQL Editor에서 cards 테이블 + RLS 정책 실행
+- [x] Authentication → Providers에서 Google OAuth 활성화
+- [x] Authentication → Providers에서 GitHub OAuth 활성화
+- [x] Authentication → URL Configuration에 Site URL 및 Redirect URL 추가
 
 ---
 
 ## Phase 6: 검증
 
-- [ ] 이메일 회원가입 → 확인 메일 수신 확인
-- [ ] 이메일 로그인 → 보드 화면 진입 확인
+- [x] 이메일 회원가입 → 확인 메일 수신 확인
+- [ ] 이메일 로그인 → 보드 화면 진입 확인 (이메일 확인 404 이슈 해결 중)
 - [ ] Google 소셜 로그인 → 보드 화면 진입 확인
 - [ ] GitHub 소셜 로그인 → 보드 화면 진입 확인
 - [ ] 카드 추가 후 Supabase Table Editor에서 데이터 확인
@@ -103,8 +103,8 @@
 
 ## Phase 7: 배포
 
-- [ ] GitHub Pages 배포 확인 (`https://syjoo1515.github.io/kanban`)
-- [ ] Supabase Redirect URL에 GitHub Pages URL 등록
+- [x] GitHub Pages 배포 확인 (`https://syjoo1515.github.io/kanban`)
+- [x] Supabase Redirect URL에 GitHub Pages URL 등록
 
 ---
 

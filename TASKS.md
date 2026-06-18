@@ -108,9 +108,38 @@
 
 ---
 
-## Phase 8: 향후 작업
+---
+
+## Phase 9: 팀 공유 + 수정 이력 (v3)
+
+### DB 스키마 (사용자 직접 수행)
+- [x] `boards` 테이블 + RLS 생성
+- [x] `board_members` 테이블 + RLS 생성
+- [x] `cards` 테이블 재생성 (board_id 추가) + RLS
+- [x] `card_history` 테이블 + RLS 생성
+- [x] `boards.max_members` 컬럼 추가
+- [x] `boards.owner_email` 컬럼 추가
+- [x] boards RLS — `auth.role() = 'authenticated'` 조건 추가 (공유코드 조회 허용)
+- [ ] Supabase Realtime → `cards` 테이블 활성화
+
+### 구현
+- [x] `index.html` — 공유코드 생성 모달, 보드 참여 모달, 이력 모달, Room Bar, 보드 정보 사이드바
+- [x] `app.js` — `initBoard()`, `switchBoard()`, `renderRoomBar()`, `renderBoardInfo()`, `joinBoard()`, `logHistory()`, `renderHistory()`, Realtime 구독
+- [x] `style.css` — Room Bar, 사이드바, 공유코드 생성/참여 모달 스타일
+- [x] `DatabaseDesign.md` v3 업데이트 (4개 테이블 + max_members/owner_email)
+
+### 검증
+- [ ] 로그인 후 사이드바에 보드 정보 표시 확인
+- [ ] `+ 공유코드 생성` 클릭 → 방 이름/인원 입력 → 코드 생성 확인
+- [ ] Room Bar에서 보드 전환 확인
+- [ ] 다른 계정으로 공유코드 입력 → 동일 보드 확인
+- [ ] 카드 추가/이동/삭제 후 [이력 보기] 모달에서 기록 확인
+- [ ] 두 브라우저 동시 접속 → 한쪽 변경 시 다른 쪽 자동 반영 확인
+
+---
+
+## Phase 10: 향후 작업
 
 - [ ] 카드 상세 편집 (설명, 마감일, 담당자)
-- [ ] 다중 보드 지원
-- [ ] Supabase Realtime으로 실시간 협업
 - [ ] 컬럼 커스터마이징
+- [ ] 멤버 목록 및 강퇴 기능

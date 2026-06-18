@@ -78,9 +78,10 @@ kanban/
 |------|----|
 | Project URL | `https://ztoxcwkonwdmxmeiieyb.supabase.co` |
 | ANON KEY 위치 | `supabase.js` |
-| cards 테이블 | `id(uuid)`, `user_id(uuid)`, `title(text)`, `column(text)`, `position(int)`, `created_at(timestamptz)` |
-| column 허용값 | `'todo'`, `'inprogress'`, `'done'` |
-| RLS 정책 | `auth.uid() = user_id` (본인 카드만 접근 가능) |
+| 테이블 목록 | `boards`, `board_members`, `cards`, `card_history` |
+| cards."column" 허용값 | `'todo'` \| `'inprogress'` \| `'done'` (예약어라 쿼리 시 따옴표 필수) |
+| boards RLS | 인증 사용자 전체 조회 가능 (공유코드 검색 허용) + owner만 수정 |
+| cards RLS | board_members 기반 — 보드 소유자 또는 멤버만 접근 |
 
 ---
 
@@ -89,12 +90,20 @@ kanban/
 | 함수 | 역할 |
 |------|------|
 | `showAuth()` / `showBoard()` | 화면 전환 (`.hidden` 클래스 토글) |
-| `showError(msg)` / `clearError()` | 에러 메시지 표시/숨김 |
-| `getCurrentUser()` | 현재 세션 유저 반환 |
-| `loadCards()` | Supabase에서 카드 로드 후 렌더링 |
-| `addCard(title, column)` | 카드 생성 (DB insert + 로컬 배열 추가) |
-| `deleteCard(id)` | 카드 삭제 (DB delete + 로컬 배열 제거) |
-| `moveCard(id, targetColumn)` | 카드 이동 (DB update + 로컬 변경) |
+| `showError(msg)` / `clearError()` | 인증 화면 에러 메시지 표시/숨김 |
+| `showBoardError(msg)` | 보드 화면 에러 메시지 (5초 후 자동 제거) |
+| `initBoard(user)` | 로그인 후 내 보드 조회/생성, 참여 보드 목록 로드 |
+| `switchBoard(board)` | 보드 전환 (Realtime 재구독, 카드/사이드바 업데이트) |
+| `renderRoomBar()` | 상단 Room Bar 렌더링 (내 보드 + 참여 보드 칩) |
+| `renderBoardInfo(board, isOwner)` | 사이드바 보드 정보 업데이트 |
+| `joinBoard()` | 공유코드로 보드 참여 (board_members upsert) |
+| `loadCards()` | board_id 기준으로 Supabase에서 카드 로드 |
+| `addCard(title, column)` | 카드 생성 + 이력 기록 |
+| `deleteCard(id)` | 카드 삭제 + 이력 기록 |
+| `moveCard(id, targetColumn)` | 카드 이동 + 이력 기록 |
+| `logHistory(action, card, from, to)` | card_history 테이블에 이력 insert |
+| `renderHistory()` | 이력 모달 내용 렌더링 |
+| `subscribeRealtime()` | Supabase Realtime으로 cards 변경 구독 |
 | `renderBoard()` | 전체 보드 DOM 재렌더링 |
 | `createCardEl(card)` | 카드 DOM 요소 생성 및 이벤트 바인딩 |
 
@@ -109,13 +118,22 @@ kanban/
 | `#btn-google` / `#btn-github` | 소셜 로그인 버튼 |
 | `#btn-login` / `#btn-signup` | 이메일 로그인/회원가입 버튼 |
 | `#btn-logout` | 로그아웃 버튼 |
-| `#auth-error` | 인증 에러 메시지 표시 영역 |
+| `#auth-error` | 인증 에러 메시지 (기본 `.hidden`) |
 | `#user-email` | 헤더 유저 이메일 표시 |
+| `#btn-create-board` | `+ 공유코드 생성` 버튼 |
+| `#share-code` | 현재 보드 공유코드 표시 (내 보드일 때만 표시) |
+| `#btn-copy-code` | 공유코드 복사 버튼 |
+| `#room-bar` | 상단 보드 선택 바 |
+| `#room-list` | 보드 칩 목록 |
+| `#board-wrapper` | 사이드바 + 메인 보드 감싸는 래퍼 |
+| `#board-info` | 좌측 보드 정보 사이드바 |
+| `#info-board-name` / `#info-board-date` / `#info-board-owner` / `#info-board-role` | 사이드바 정보 항목 |
+| `#btn-history` | 이력 보기 버튼 (사이드바 하단) |
+| `#create-board-modal` | 공유코드 생성 모달 |
+| `#join-board-modal` | 보드 참여 모달 |
+| `#history-modal` | 이력 보기 모달 |
 | `.column[data-column]` | 컬럼 (`todo` / `inprogress` / `done`) |
-| `#list-{col}` | 컬럼별 카드 목록 `<ul>` |
-| `#badge-{col}` | 컬럼별 카드 수 배지 |
-| `.card-input[data-column]` | 카드 추가 입력창 |
-| `.add-btn[data-column]` | 카드 추가 버튼 |
+| `#list-{col}` / `#badge-{col}` | 컬럼별 카드 목록 / 배지 |
 
 ---
 
@@ -123,10 +141,12 @@ kanban/
 
 | 이슈 | 내용 |
 |------|------|
-| 이메일 확인 404 | Supabase Site URL 설정 필요. Authentication → URL Configuration → Site URL을 `https://syjoo1515.github.io/kanban`으로 설정 |
-| 소셜 계정 중복 가입 | `signUp` 시 `identities` 배열이 비어있으면 중복 안내 메시지 표시 (app.js:70) |
-| ES Module 제약 | `<script type="module">`로 로드하므로 로컬 파일(`file://`) 직접 열기 불가. 반드시 HTTP 서버 경유 |
-| Supabase CDN | 외부 CDN 의존성 있음. 네트워크 없는 환경에서는 동작 불가 |
+| 이메일 확인 404 | Supabase Site URL 설정 필요 (Authentication → URL Configuration) |
+| 로컬 OAuth 리다이렉트 | Supabase Redirect URLs에 `http://localhost:8080` 추가 필요 |
+| 소셜 계정 중복 가입 | `identities` 배열이 비어있으면 중복 안내 메시지 표시 |
+| ES Module 제약 | `file://` 직접 열기 불가. 반드시 HTTP 서버 경유 (`python3 -m http.server 8080`) |
+| Supabase CDN | 외부 CDN 의존성 있음. 오프라인 환경 동작 불가 |
+| boards.owner_email | 기존 보드는 `owner_email`이 null일 수 있음 (신규 생성 보드부터 저장됨) |
 
 ---
 
@@ -134,6 +154,6 @@ kanban/
 
 | 구간 | 레이아웃 |
 |------|---------|
-| `> 1024px` | 3컬럼 수평 (300px 고정) |
-| `≤ 1024px` | 2컬럼 flex-wrap |
-| `≤ 640px` | 1컬럼 수직 스택, 삭제 버튼 항상 표시 |
+| `> 1024px` | 사이드바(200px) + 3컬럼 수평 |
+| `≤ 1024px` | 사이드바(160px) + 2컬럼 flex-wrap |
+| `≤ 640px` | 사이드바 상단 수평 배치 + 1컬럼 수직 스택 |

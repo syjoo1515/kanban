@@ -264,3 +264,26 @@
 **작업**
 - `workflow.md` 생성 (전체 작업 이력 정리)
 - `CLAUDE.md` 생성 (workflow.md 갱신 규칙 포함)
+
+---
+
+### 24. CLAUDE.md 참고 정보 보완 요청
+
+**프롬프트**
+> claude.md는 동기화 외에도 너가 현재 프로그램에서 참고해야 할 정보들을 추가적으로 정리해둬
+
+**작업**
+- `CLAUDE.md` 재작성 — 저장소 정보, 기술 스택, Supabase 연동 정보, 핵심 함수 목록, DOM 구조, 알려진 이슈, 반응형 브레이크포인트 추가
+- 두 저장소 커밋 및 push
+
+---
+
+### 25. GitHub 소셜 로그인 버튼 무반응 버그
+
+**프롬프트**
+> github으로 계속하기 버튼으로 로그인하려는데 버튼이 반응하지 않아
+
+**작업**
+- `app.js` Google/GitHub 소셜 버튼 핸들러에 `async/await` 및 에러 처리 추가
+- Supabase Dashboard GitHub Provider 활성화 여부 확인 안내
+- `TASKS.md` / `workflow.md` 업데이트

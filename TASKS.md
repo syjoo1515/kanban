@@ -62,8 +62,8 @@
 - [x] 이메일 로그인 (`signInWithPassword`)
 - [x] 이메일 회원가입 (`signUp`)
 - [x] 소셜 계정 중복 이메일 회원가입 시 안내 메시지 표시
-- [x] Google OAuth 로그인 (`signInWithOAuth`)
-- [x] GitHub OAuth 로그인 (`signInWithOAuth`)
+- [x] Google OAuth 로그인 (`signInWithOAuth`, async/await + 에러 처리)
+- [x] GitHub OAuth 로그인 (`signInWithOAuth`, async/await + 에러 처리)
 - [x] 로그아웃 (`signOut`)
 - [x] `loadCards()` — Supabase DB에서 카드 로드
 - [x] `addCard()` — Supabase DB에 카드 추가

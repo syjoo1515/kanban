@@ -28,14 +28,22 @@ supabase.auth.onAuthStateChange((_event, session) => {
   }
 });
 
-document.getElementById('btn-google').addEventListener('click', () => {
+document.getElementById('btn-google').addEventListener('click', async () => {
   clearError();
-  supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.href } });
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: location.href }
+  });
+  if (error) showError(error.message);
 });
 
-document.getElementById('btn-github').addEventListener('click', () => {
+document.getElementById('btn-github').addEventListener('click', async () => {
   clearError();
-  supabase.auth.signInWithOAuth({ provider: 'github', options: { redirectTo: location.href } });
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: { redirectTo: location.href }
+  });
+  if (error) showError(error.message);
 });
 
 document.getElementById('btn-login').addEventListener('click', async (e) => {

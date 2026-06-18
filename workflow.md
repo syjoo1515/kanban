@@ -299,3 +299,15 @@
 - `app.js` `loadCards`, `addCard`, `deleteCard`, `moveCard` 에러를 화면에 표시하도록 수정
 - `select()` 쿼리에서 `"column"` 예약어 명시적 처리
 - `showBoardError()` 함수 추가 (5초 후 자동 제거)
+
+---
+
+### 27. 로그아웃 후 재로그인 무반응 버그
+
+**프롬프트**
+> 최초 깃헙으로 로그인한 다음, 로그아웃하고 다시 로그인 하려고 하면 웹이 반응하지 않아
+
+**작업**
+- `onAuthStateChange`에서 로그아웃 시 URL 해시 제거 처리 추가
+- `signOut({ scope: 'local' })`으로 로컬 세션 명시적 정리
+- 로그아웃 시 `cards` 배열 초기화 및 에러 메시지 제거

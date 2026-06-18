@@ -29,13 +29,18 @@ function showBoardError(msg) {
   setTimeout(() => el.remove(), 5000);
 }
 
-supabase.auth.onAuthStateChange((_event, session) => {
+supabase.auth.onAuthStateChange((event, session) => {
   if (session?.user) {
     userEmailEl.textContent = session.user.email ?? session.user.user_metadata?.user_name ?? '';
     showBoard();
     loadCards();
   } else {
+    // SIGNED_OUT 또는 세션 없음 → 로그인 화면
     showAuth();
+    // OAuth 리다이렉트 후 URL 해시 제거
+    if (window.location.hash) {
+      history.replaceState(null, '', window.location.pathname);
+    }
   }
 });
 
@@ -93,8 +98,10 @@ document.getElementById('btn-signup').addEventListener('click', async () => {
   showError('확인 이메일을 발송했습니다. 메일함을 확인해주세요.');
 });
 
-document.getElementById('btn-logout').addEventListener('click', () => {
-  supabase.auth.signOut();
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await supabase.auth.signOut({ scope: 'local' });
+  cards = [];
+  clearError();
 });
 
 // ── State ─────────────────────────────────────────────────────────────────────
